@@ -3,13 +3,11 @@ package main
 import (
 	"gin-test/controllers"
 	"gin-test/inits"
-	"os"
 
 	"github.com/gin-gonic/gin"
 )
 
 func init() {
-	// Load Envs and connect to DB
 	inits.ConnectToDB()
 }
 
@@ -39,9 +37,5 @@ func main() {
 	r.POST("/orders", controllers.CreateOrder)
 	r.GET("/orders", controllers.GetOrders)
 
-	port := os.Getenv("port")
-	if port == "" {
-		port = "8080"
-	}
-	r.Run(":"+port) 
+	r.Run() 
 }

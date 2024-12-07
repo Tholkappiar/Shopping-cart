@@ -4,7 +4,6 @@ import (
 	"gin-test/inits"
 	"gin-test/models"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -75,7 +74,7 @@ func generateJWT(_ uint) string {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	secretKey := os.Getenv("JWT_SECRET_KEY")
+	secretKey := "some_secret_key"
 	tokenString, _ := token.SignedString([]byte(secretKey))
 
 	return tokenString
