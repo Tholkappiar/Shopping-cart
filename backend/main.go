@@ -4,6 +4,7 @@ import (
 	"gin-test/controllers"
 	"gin-test/inits"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,6 +16,14 @@ func init() {
 func main() {
 	r := gin.Default()
 
+	r.Use(cors.New(cors.Config{
+		AllowAllOrigins:  true,
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
+	
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "this is nice , from thols",
