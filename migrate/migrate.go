@@ -1,4 +1,4 @@
-package main
+package migrate
 
 import (
 	"gin-test/inits"
@@ -10,7 +10,7 @@ func init() {
 	inits.ConnectToDB()
 }
 
-func main() {
+func Migrate() {
 	err := inits.DB.AutoMigrate(
 		&models.User{},
 		&models.Item{},

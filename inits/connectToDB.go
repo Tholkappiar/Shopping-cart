@@ -1,6 +1,7 @@
 package inits
 
 import (
+	"fmt"
 	"log"
 
 	"gorm.io/driver/postgres"
@@ -10,6 +11,7 @@ import (
 var DB *gorm.DB
 
 func ConnectToDB() {
+	fmt.Println("in connect to db file")
 	var err error
 	dsn := "host=ep-silent-night-a1qkabd7.ap-southeast-1.aws.neon.tech user=neondb_owner password=sJx1aiMpG4Nc dbname=shopping-cart port=5432 sslmode=require"
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
