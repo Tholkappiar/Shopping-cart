@@ -2,7 +2,6 @@ package main
 
 import (
 	"gin-test/test1"
-	"gin-test/test2"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,20 +20,6 @@ func main() {
 	})
 
 	r.GET("/test1", test1.Test1)
-	r.GET("/test2", test2.Test2)
-	// r.GET("/users", controllers.GetUsers)
-
-	// // Item routes
-	// r.POST("/items", controllers.CreateItem)
-	// r.GET("/items", controllers.GetItems)
-
-	// // Cart routes
-	// r.POST("/carts", controllers.CreateCart)
-	// r.GET("/carts", controllers.GetCarts)
-
-	// // Order routes
-	// r.POST("/orders", controllers.CreateOrder)
-	// r.GET("/orders", controllers.GetOrders)
 
 	r.Run() 
 }
