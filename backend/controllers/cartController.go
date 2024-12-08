@@ -53,11 +53,23 @@ func CreateCart(c *gin.Context) {
 
 
 func GetCarts(c *gin.Context) {
+    token := c.GetHeader("Authorization")
+    if token == "" {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing token"})
+        return
+    }
+
+    var user models.User
+    if err := inits.DB.Where("token = ?", token).First(&user).Error; err != nil {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+        return
+    }
+
     var carts []models.Cart
-    if err := inits.DB.Preload("Items").Find(&carts).Error; err != nil {
+    if err := inits.DB.Preload("Items").Where("user_id = ?", user.ID).Find(&carts).Error; err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
         return
     }
+
     c.JSON(http.StatusOK, carts)
 }
-
