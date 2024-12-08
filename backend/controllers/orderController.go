@@ -18,7 +18,6 @@ func CreateOrder(c *gin.Context) {
         return
     }
 
-    // Get cart_id from request
     var input struct {
         CartID uint `json:"cart_id"`
     }
@@ -28,7 +27,7 @@ func CreateOrder(c *gin.Context) {
     }
 
     var cart models.Cart
-    if err := inits.DB.Preload("Items").Where("id = ? AND user_id = ? AND status = ?", input.CartID, user.ID, "active").First(&cart).Error; err != nil {
+    if err := inits.DB.Where("id = ? AND user_id = ? AND status = ?", input.CartID, user.ID, "active").First(&cart).Error; err != nil {
         c.JSON(http.StatusNotFound, gin.H{"error": "Cart not found or not active"})
         return
     }

@@ -22,7 +22,7 @@ type Item struct {
 type Cart struct {
     ID        uint      `gorm:"primaryKey"`
     UserID    uint      `gorm:"not null"`
-    Items     []Item    `gorm:"many2many:cart_items;"`
+    ItemID    uint      `gorm:"not null"`
     Status    string    `gorm:"default:'active'"`
     CreatedAt time.Time
 }

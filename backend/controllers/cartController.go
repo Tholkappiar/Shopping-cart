@@ -9,7 +9,6 @@ import (
 )
 
 func CreateCart(c *gin.Context) {
-    var cart models.Cart
     var user models.User
     token := c.GetHeader("Authorization")
 
@@ -18,32 +17,23 @@ func CreateCart(c *gin.Context) {
         return
     }
 
-    cart.UserID = user.ID
-
-    var cartItems []struct {
-        ItemID   uint
-        Quantity uint
-    }
-    if err := c.ShouldBindJSON(&cartItems); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-        return
+    cart := models.Cart{
+        UserID: user.ID,
+        Status: "active", 
     }
 
     var items []models.Item
-    for _, cartItem := range cartItems {
-        var item models.Item
-        if err := inits.DB.Where("id = ?", cartItem.ItemID).First(&item).Error; err != nil {
-            c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid item ID"})
-            return
-        }
-        items = append(items, item)
+    if err := inits.DB.Where("status = ?", "active").Find(&items).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch items"})
+        return
     }
 
-    cart.Items = items
-
-    if err := inits.DB.Create(&cart).Error; err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create cart"})
-        return
+    for _, item := range items {
+        cart.ItemID = item.ID 
+        if err := inits.DB.Create(&cart).Error; err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create cart"})
+            return
+        }
     }
 
     c.JSON(http.StatusOK, gin.H{"message": "Cart created successfully", "cart_id": cart.ID})
