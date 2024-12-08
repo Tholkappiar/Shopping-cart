@@ -30,5 +30,10 @@ func main() {
 	r.POST("/items", controllers.CreateItem)
 	r.GET("/items", controllers.GetItems)
 
+	// Order routes
+	r.POST("/orders", controllers.CreateOrder)
+	r.GET("/orders", controllers.GetOrders)
+	
+
 	r.Run() 
 }
