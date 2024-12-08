@@ -20,8 +20,8 @@ func main() {
 		})
 	})
 
-	r.POST("/test1", test1.Test1)
-	r.POST("/test2", test2.Test2)
+	r.GET("/test1", test1.Test1)
+	r.GET("/test2", test2.Test2)
 	// r.GET("/users", controllers.GetUsers)
 
 	// // Item routes
