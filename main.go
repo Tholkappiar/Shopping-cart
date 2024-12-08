@@ -26,5 +26,9 @@ func main() {
 	r.POST("/users/login", controllers.LoginUser)
 	r.GET("/users", controllers.GetUsers)
 
+	// Item routes
+	r.POST("/items", controllers.CreateItem)
+	r.GET("/items", controllers.GetItems)
+
 	r.Run() 
 }
