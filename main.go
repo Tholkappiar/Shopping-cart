@@ -34,6 +34,9 @@ func main() {
 	r.POST("/orders", controllers.CreateOrder)
 	r.GET("/orders", controllers.GetOrders)
 	
+    // Cart routes
+	r.POST("/carts", controllers.CreateCart)
+	r.GET("/carts", controllers.GetCarts)
 
 	r.Run() 
 }
