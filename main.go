@@ -2,11 +2,13 @@ package main
 
 import (
 	"gin-test/controllers"
+	"gin-test/inits"
 
 	"github.com/gin-gonic/gin"
 )
 
 func init() {
+	inits.ConnectToDB()
 }
 
 
