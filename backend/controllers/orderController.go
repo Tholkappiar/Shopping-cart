@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+
 func CreateOrder(c *gin.Context) {
     var user models.User
     token := c.GetHeader("Authorization")
@@ -17,9 +18,18 @@ func CreateOrder(c *gin.Context) {
         return
     }
 
+    // Get cart_id from request
+    var input struct {
+        CartID uint `json:"cart_id"`
+    }
+    if err := c.ShouldBindJSON(&input); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+        return
+    }
+
     var cart models.Cart
-    if err := inits.DB.Preload("Items").Where("user_id = ? AND status = ?", user.ID, "active").First(&cart).Error; err != nil {
-        c.JSON(http.StatusNotFound, gin.H{"error": "Active cart not found"})
+    if err := inits.DB.Preload("Items").Where("id = ? AND user_id = ? AND status = ?", input.CartID, user.ID, "active").First(&cart).Error; err != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "Cart not found or not active"})
         return
     }
 
@@ -32,7 +42,7 @@ func CreateOrder(c *gin.Context) {
         return
     }
 
-    cart.Status = "completed" 
+    cart.Status = "completed"
     if err := inits.DB.Save(&cart).Error; err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update cart status"})
         return
@@ -45,12 +55,23 @@ func CreateOrder(c *gin.Context) {
 
 
 func GetOrders(c *gin.Context) {
-	var orders []models.Order
+    token := c.GetHeader("Authorization")
+    if token == "" {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing token"})
+        return
+    }
 
-	if err := inits.DB.Preload("Cart.Items").Find(&orders).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
+    var user models.User
+    if err := inits.DB.Where("token = ?", token).First(&user).Error; err != nil {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+        return
+    }
 
-	c.JSON(http.StatusOK, orders)
+    var orders []models.Order
+    if err := inits.DB.Preload("Cart.Items").Where("user_id = ?", user.ID).Find(&orders).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"orders": orders})
 }
