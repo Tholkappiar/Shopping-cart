@@ -6,9 +6,9 @@ type User struct {
 	ID        uint      `gorm:"primaryKey"`
 	Username  string    `gorm:"unique;not null"`
 	Password  string    `gorm:"not null"`
-	Token     string    `gorm:"unique"` // Ensure uniqueness for tokens
+	Token     string    
 	CreatedAt time.Time
-	UpdatedAt time.Time // Added UpdatedAt for tracking updates
+	UpdatedAt time.Time 
 }
 
 type Item struct {
@@ -39,7 +39,7 @@ type Order struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	User      User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
-	OrderItems []OrderItem `gorm:"foreignKey:OrderID"` // Added association with OrderItem
+	OrderItems []OrderItem `gorm:"foreignKey:OrderID"` 
 }
 
 type OrderItem struct {
@@ -47,7 +47,7 @@ type OrderItem struct {
 	OrderID   uint      `gorm:"not null"`
 	ItemID    uint      `gorm:"not null"`
 	Quantity  int       `gorm:"default:1;not null"`
-	Price     float64   `gorm:"not null"` // Snapshot price for the order
+	Price     float64   `gorm:"not null"` 
 	CreatedAt time.Time
 	Item      Item      `gorm:"foreignKey:ItemID;constraint:OnDelete:CASCADE"`
 }

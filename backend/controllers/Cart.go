@@ -19,10 +19,9 @@ func validateJWT(token string) (uint, error) {
     })
     
     if err != nil || !parsedToken.Valid {
-        return 0, err // Token is invalid
+        return 0, err
     }
 
-    // Use the standard claims
     if claims["jti"] != nil {
         userID, err := strconv.ParseUint(fmt.Sprint(claims["jti"]), 10, 32)
         if err != nil {
@@ -35,21 +34,18 @@ func validateJWT(token string) (uint, error) {
 }
 
 func AddToCart(c *gin.Context) {
-    // Extract token from Authorization header
     authHeader := c.GetHeader("Authorization")
     if authHeader == "" {
         c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization token is required"})
         return
     }
 
-    // Validate JWT and get user_id
     userID, err := validateJWT(authHeader)
     if err != nil {
         c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
         return
     }
 
-    // Parse input
     var input struct {
         ItemID uint `json:"item_id"`
     }
@@ -58,7 +54,6 @@ func AddToCart(c *gin.Context) {
         return
     }
 
-    // Add item to cart
     cartItem := models.CartItem{
         UserID:    userID,
         ItemID:    input.ItemID,
@@ -74,24 +69,21 @@ func AddToCart(c *gin.Context) {
 }
 
 func GetUserCart(c *gin.Context) {
-    // Extract token from Authorization header
     authHeader := c.GetHeader("Authorization")
     if authHeader == "" {
         c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization token is required"})
         return
     }
 
-    // Validate JWT and get user_id
     userID, err := validateJWT(authHeader)
     if err != nil {
         c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
         return
     }
 
-    // Retrieve active cart items for the user
     var cartItems []models.CartItem
     if err := inits.DB.
-        Preload("Item"). // Load associated Item details
+        Preload("Item").
         Where("user_id = ? AND status = 'active'", userID).
         Find(&cartItems).Error; err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve cart items"})
