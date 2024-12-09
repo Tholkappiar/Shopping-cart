@@ -15,7 +15,7 @@ import (
 func validateJWT(token string) (uint, error) {
     claims := jwt.MapClaims{}
     parsedToken, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
-        return []byte("some*secret_key"), nil
+        return []byte("some_secret_key"), nil
     })
     
     if err != nil || !parsedToken.Valid {
