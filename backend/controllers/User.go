@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"fmt"
 	"gin-test/inits"
 	"gin-test/models"
+	"log"
 	"net/http"
 	"time"
 
@@ -38,7 +40,6 @@ func LoginUser(c *gin.Context) {
 		Username string `json:"username"`
 		Password string `json:"password"`
 	}
-
 	if err := c.ShouldBindJSON(&loginData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -57,34 +58,35 @@ func LoginUser(c *gin.Context) {
 
 	token := generateJWT(user.ID)
 	user.Token = token
-
-	if err := inits.DB.Save(&user).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save token"})
-		return
-	}
+	inits.DB.Save(&user)
 
 	c.JSON(http.StatusOK, gin.H{"token": token})
 }
 
-func generateJWT(_ uint) string {
-	expirationTime := time.Now().Add(24 * time.Hour)
-	claims := &jwt.StandardClaims{
-		ExpiresAt: expirationTime.Unix(),
-		Issuer:    "shopping-cart-app",
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	secretKey := "some_secret_key"
-	tokenString, _ := token.SignedString([]byte(secretKey))
-
-	return tokenString
+func generateJWT(userID uint) string {
+    expirationTime := time.Now().Add(24 * time.Hour)
+    claims := &jwt.StandardClaims{
+        ExpiresAt: expirationTime.Unix(),
+        Issuer:    "shopping-cart-app",
+        Id:        fmt.Sprintf("%d", userID),
+    }
+    token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+    tokenString, err := token.SignedString([]byte("some*secret_key"))
+    if err != nil {
+        log.Printf("Error generating token: %v", err)
+        return ""
+    }
+    return tokenString
 }
 
-func GetUsers(c *gin.Context) {
+func GetAllUsers(c *gin.Context) {
 	var users []models.User
-	if err := inits.DB.Find(&users).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to fetch users"})
+
+	result := inits.DB.Find(&users)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch users"})
 		return
 	}
-	c.JSON(http.StatusOK, users)
+
+	c.JSON(http.StatusOK, gin.H{"users": users})
 }

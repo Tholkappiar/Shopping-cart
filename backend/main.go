@@ -3,6 +3,8 @@ package main
 import (
 	"gin-test/controllers"
 	"gin-test/inits"
+	"gin-test/models"
+	"log"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -10,42 +12,47 @@ import (
 
 func init() {
 	inits.ConnectToDB()
+	err := inits.DB.AutoMigrate(
+		&models.User{},
+		&models.Item{},
+		&models.CartItem{},
+		&models.Order{},
+	)
+	if err != nil {
+		log.Fatal("Migration failed:", err)
+	} else {
+		log.Println("Migration successful")
+	}
 }
-
 
 func main() {
 	r := gin.Default()
 
+	// CORS configuration
 	r.Use(cors.New(cors.Config{
-		AllowAllOrigins:  true,
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Content-Type", "Authorization"},
-		ExposeHeaders:    []string{"Content-Length"},
+		AllowAllOrigins: true,
+		AllowMethods:    []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:    []string{"Content-Type", "Authorization"},
+		ExposeHeaders:   []string{"Content-Length"},
 		AllowCredentials: true,
 	}))
-	
-	r.GET("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "this is nice , from thols",
-		})
-	})
 
-
+	// User routes
 	r.POST("/users", controllers.CreateUser)
 	r.POST("/users/login", controllers.LoginUser)
-	r.GET("/users", controllers.GetUsers)
+	r.GET("/users", controllers.GetAllUsers)
 
 	// Item routes
 	r.POST("/items", controllers.CreateItem)
 	r.GET("/items", controllers.GetItems)
 
-	// Order routes
-	r.POST("/orders", controllers.CreateOrder)
-	r.GET("/orders", controllers.GetOrders)
-	
-    // Cart routes
-	r.POST("/carts", controllers.CreateCart)
-	r.GET("/carts", controllers.GetCarts)
+	// Cart routes
+	r.POST("/cart", controllers.AddToCart)
+	r.GET("/cart", controllers.GetUserCart) // New API to get user-specific cart
 
-	r.Run() 
+	// Order routes
+	r.POST("/checkout", controllers.CreateOrder)
+	r.GET("/orders", controllers.GetOrders) // New API to get user-specific orders
+
+	r.Run(":8080") // Start server on port 8080
 }

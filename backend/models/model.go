@@ -3,40 +3,51 @@ package models
 import "time"
 
 type User struct {
-    ID        uint      `gorm:"primaryKey"`
-    Username  string    `gorm:"unique"`
-    Password  string
-    Token     string
-    Carts     []Cart    `gorm:"foreignKey:UserID"`
-    Orders    []Order   `gorm:"foreignKey:UserID"`
-    CreatedAt time.Time
+	ID        uint      `gorm:"primaryKey"`
+	Username  string    `gorm:"unique;not null"`
+	Password  string    `gorm:"not null"`
+	Token     string    `gorm:"unique"` // Ensure uniqueness for tokens
+	CreatedAt time.Time
+	UpdatedAt time.Time // Added UpdatedAt for tracking updates
 }
 
 type Item struct {
-    ID        uint      `gorm:"primaryKey"`
-    Name      string
-    Price     float64
-    CreatedAt time.Time
-}
-
-type Cart struct {
-    ID        uint      `gorm:"primaryKey"`
-    UserID    uint      `gorm:"not null"`
-    ItemID    uint      `gorm:"not null"`
-    Status    string    `gorm:"default:'active'"`
-    CreatedAt time.Time
+	ID        uint      `gorm:"primaryKey"`
+	Name      string    `gorm:"not null"`
+	Price     float64   `gorm:"not null"`
+	Status    string    `gorm:"default:'active';not null"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 type CartItem struct {
-    CartID   uint  `gorm:"primaryKey"`
-    ItemID   uint  `gorm:"primaryKey"`
+	ID        uint      `gorm:"primaryKey"`
+	UserID    uint      `gorm:"not null"`
+	ItemID    uint      `gorm:"not null"`
+	Quantity  uint      `gorm:"default:1"`
+	Status    string    `gorm:"default:'active'"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Item      Item      `gorm:"foreignKey:ItemID"`
 }
 
 type Order struct {
-    ID        uint      `gorm:"primaryKey"`
-    UserID    uint      `gorm:"not null"`
-    CartID    uint      `gorm:"not null"`
-    Cart      Cart      `gorm:"foreignKey:CartID"`
-    User      User      `gorm:"foreignKey:UserID"`
-    CreatedAt time.Time
+	ID        uint      `gorm:"primaryKey"`
+	UserID    uint      `gorm:"not null"`
+	Status    string    `gorm:"default:'delivered';not null"`
+	Total     float64   `gorm:"not null"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	User      User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	OrderItems []OrderItem `gorm:"foreignKey:OrderID"` // Added association with OrderItem
+}
+
+type OrderItem struct {
+	ID        uint      `gorm:"primaryKey"`
+	OrderID   uint      `gorm:"not null"`
+	ItemID    uint      `gorm:"not null"`
+	Quantity  int       `gorm:"default:1;not null"`
+	Price     float64   `gorm:"not null"` // Snapshot price for the order
+	CreatedAt time.Time
+	Item      Item      `gorm:"foreignKey:ItemID;constraint:OnDelete:CASCADE"`
 }

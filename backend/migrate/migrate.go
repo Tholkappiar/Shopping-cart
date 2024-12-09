@@ -1,4 +1,4 @@
-package migrate
+package main
 
 import (
 	"gin-test/inits"
@@ -10,12 +10,13 @@ func init() {
 	inits.ConnectToDB()
 }
 
-func Migrate() {
+func main() {
 	err := inits.DB.AutoMigrate(
 		&models.User{},
 		&models.Item{},
-		&models.Cart{},
+		&models.CartItem{},
 		&models.Order{},
+		&models.OrderItem{},
 	)
 	if err != nil {
 		log.Fatal("Migration failed:", err)
