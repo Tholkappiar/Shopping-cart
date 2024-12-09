@@ -71,7 +71,7 @@ func generateJWT(userID uint) string {
         Id:        fmt.Sprintf("%d", userID),
     }
     token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-    tokenString, err := token.SignedString([]byte("some*secret_key"))
+    tokenString, err := token.SignedString([]byte("some_secret_key"))
     if err != nil {
         log.Printf("Error generating token: %v", err)
         return ""
