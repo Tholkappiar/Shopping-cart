@@ -2,10 +2,12 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { API_URLS } from "../utils/utils";
 import useAuth from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 export const History = () => {
     const [orders, setOrders] = useState(null);
     const { auth } = useAuth();
+    const navigate = useNavigate();
 
     useEffect(() => {
         async function getData() {
@@ -21,12 +23,16 @@ export const History = () => {
                 console.log(data);
                 setOrders(data.orders);
             } catch (error) {
-                console.error("Error fetching orders data:", error);
+                if (error.response && error.response.status === 401) {
+                    navigate("/login");
+                } else {
+                    console.error("Error adding item to cart:", error);
+                }
             }
         }
 
         getData();
-    }, [auth]);
+    }, [auth, navigate]);
 
     return (
         <div className="min-h-screen bg-gray-100 p-4">

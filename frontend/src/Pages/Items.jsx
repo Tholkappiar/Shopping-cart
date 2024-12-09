@@ -2,29 +2,38 @@ import axios from "axios";
 import { API_URLS } from "../utils/utils";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Items = () => {
     const { auth } = useContext(AuthContext);
     const [items, setItems] = useState([]);
     const [message, setMessage] = useState("");
+    const navigate = useNavigate();
 
-    // Fetch items from the API
     useEffect(() => {
         async function getData() {
             try {
                 const response = await axios.get(
-                    API_URLS.BASE_URL + API_URLS.ITEMS
+                    API_URLS.BASE_URL + API_URLS.ITEMS,
+                    {
+                        headers: {
+                            Authorization: `${auth}`,
+                        },
+                    }
                 );
                 setItems(response.data.items);
             } catch (error) {
-                console.error("Error fetching items:", error);
-                setMessage("Failed to load items.");
+                if (error.response && error.response.status === 401) {
+                    navigate("/login");
+                } else {
+                    console.error("Error fetching items:", error);
+                    setMessage("Failed to load items.");
+                }
             }
         }
         getData();
-    }, []);
+    }, [auth, navigate]);
 
-    // Add item to cart
     const addToCart = async (itemID) => {
         const itemData = {
             item_id: itemID,
@@ -36,18 +45,21 @@ const Items = () => {
                 itemData,
                 {
                     headers: {
-                        Authorization: `${auth}`, // Use the auth token
+                        Authorization: `${auth}`,
                         "Content-Type": "application/json",
                     },
                 }
             );
-            console.log(response.data);
-            setMessage("Item added to cart successfully!");
+            if (response.ok) setMessage("Item added to cart successfully!");
         } catch (error) {
-            console.error("Error adding item to cart:", error);
-            setMessage(
-                error.response?.data?.error || "Failed to add item to cart."
-            );
+            if (error.response && error.response.status === 401) {
+                navigate("/login");
+            } else {
+                console.error("Error adding item to cart:", error);
+                setMessage(
+                    error.response?.data?.error || "Failed to add item to cart."
+                );
+            }
         }
     };
 
@@ -73,7 +85,7 @@ const Items = () => {
                             </h2>
                             <button
                                 className="mt-4 bg-indigo-500 text-white px-4 py-2 rounded-md hover:bg-indigo-600"
-                                onClick={() => addToCart(item.ID)} // Pass itemID directly
+                                onClick={() => addToCart(item.ID)}
                             >
                                 Add to Cart
                             </button>

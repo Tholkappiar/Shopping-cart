@@ -4,10 +4,12 @@ import { API_URLS } from "../utils/utils";
 import useAuth from "../hooks/useAuth";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from "react-router-dom";
 
 export const Cart = () => {
     const [activeCarts, setActiveCarts] = useState([]);
     const { auth } = useAuth();
+    const navigate = useNavigate();
 
     useEffect(() => {
         async function getData() {
@@ -24,11 +26,15 @@ export const Cart = () => {
                 console.log(data.cart);
                 setActiveCarts(data.cart);
             } catch (error) {
-                console.error("Error fetching cart data:", error);
+                if (error.response && error.response.status === 401) {
+                    navigate("/login");
+                } else {
+                    console.error("Error adding item to cart:", error);
+                }
             }
         }
         getData();
-    }, [auth]);
+    }, [auth, navigate]);
 
     async function createOrder() {
         try {
@@ -45,7 +51,7 @@ export const Cart = () => {
 
             if (response.status === 200) {
                 setActiveCarts([]);
-                toast.success("Order successful !", {
+                toast.success("Order successful!", {
                     position: "top-right",
                     autoClose: 3000,
                 });
@@ -53,10 +59,18 @@ export const Cart = () => {
             console.log("Order created successfully:", response.data);
         } catch (error) {
             console.error("Error creating order:", error);
-            toast.error("Failed to create order. Please try again!", {
-                position: toast.POSITION.TOP_CENTER,
-                autoClose: 3000,
-            });
+            if (error.response && error.response.status === 401) {
+                toast.error("Session expired. Please log in again.", {
+                    position: toast.POSITION.TOP_CENTER,
+                    autoClose: 3000,
+                });
+                navigate("/login");
+            } else {
+                toast.error("Failed to create order. Please try again!", {
+                    position: toast.POSITION.TOP_CENTER,
+                    autoClose: 3000,
+                });
+            }
         }
     }
 
