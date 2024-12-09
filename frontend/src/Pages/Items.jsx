@@ -8,6 +8,7 @@ const Items = () => {
     const { auth } = useContext(AuthContext);
     const [items, setItems] = useState([]);
     const [message, setMessage] = useState("");
+    const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -29,15 +30,15 @@ const Items = () => {
                     console.error("Error fetching items:", error);
                     setMessage("Failed to load items.");
                 }
+            } finally {
+                setIsLoading(false);
             }
         }
         getData();
     }, [auth, navigate]);
 
     const addToCart = async (itemID) => {
-        const itemData = {
-            item_id: itemID,
-        };
+        const itemData = { item_id: itemID };
 
         try {
             const response = await axios.post(
@@ -50,7 +51,7 @@ const Items = () => {
                     },
                 }
             );
-            if (response.ok) setMessage("Item added to cart successfully!");
+            if (response) setMessage("Item added to cart successfully!");
         } catch (error) {
             if (error.response && error.response.status === 401) {
                 navigate("/login");
@@ -71,7 +72,16 @@ const Items = () => {
             {message && (
                 <p className="text-center text-green-600 mb-4">{message}</p>
             )}
-            {items.length === 0 ? (
+            {isLoading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    {[...Array(4)].map((_, index) => (
+                        <div
+                            key={index}
+                            className="bg-gray-300 h-48 rounded-lg animate-pulse"
+                        ></div>
+                    ))}
+                </div>
+            ) : items.length === 0 ? (
                 <p className="text-center text-gray-500">No items available.</p>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

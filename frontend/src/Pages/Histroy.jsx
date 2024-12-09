@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 export const History = () => {
     const [orders, setOrders] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
     const { auth } = useAuth();
     const navigate = useNavigate();
 
@@ -20,14 +21,15 @@ export const History = () => {
                         },
                     }
                 );
-                console.log(data);
                 setOrders(data.orders);
             } catch (error) {
                 if (error.response && error.response.status === 401) {
                     navigate("/login");
                 } else {
-                    console.error("Error adding item to cart:", error);
+                    console.error("Error fetching orders:", error);
                 }
+            } finally {
+                setIsLoading(false);
             }
         }
 
@@ -39,7 +41,16 @@ export const History = () => {
             <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
                 Your Order History
             </h1>
-            {!orders || orders.length === 0 ? (
+            {isLoading ? (
+                <div className="space-y-4">
+                    {[...Array(3)].map((_, index) => (
+                        <div
+                            key={index}
+                            className="w-full h-24 bg-gray-300 rounded-lg animate-pulse"
+                        ></div>
+                    ))}
+                </div>
+            ) : orders && orders.length === 0 ? (
                 <p className="text-center text-gray-500">You have no orders.</p>
             ) : (
                 <div className="space-y-8">

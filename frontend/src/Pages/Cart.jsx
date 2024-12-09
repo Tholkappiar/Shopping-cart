@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 
 export const Cart = () => {
     const [activeCarts, setActiveCarts] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
     const { auth } = useAuth();
     const navigate = useNavigate();
 
@@ -23,14 +24,15 @@ export const Cart = () => {
                         },
                     }
                 );
-                console.log(data.cart);
                 setActiveCarts(data.cart);
             } catch (error) {
                 if (error.response && error.response.status === 401) {
                     navigate("/login");
                 } else {
-                    console.error("Error adding item to cart:", error);
+                    console.error("Error fetching carts:", error);
                 }
+            } finally {
+                setIsLoading(false);
             }
         }
         getData();
@@ -56,7 +58,6 @@ export const Cart = () => {
                     autoClose: 3000,
                 });
             }
-            console.log("Order created successfully:", response.data);
         } catch (error) {
             console.error("Error creating order:", error);
             if (error.response && error.response.status === 401) {
@@ -87,18 +88,25 @@ export const Cart = () => {
                     Checkout
                 </button>
             </div>
+
             <div className="flex flex-col justify-center my-8">
-                {!activeCarts.length ? (
-                    <p className="text-center text-gray-500">
-                        You have no active carts.
+                {isLoading ? (
+                    <div className="flex flex-col space-y-4">
+                        {[...Array(3)].map((_, index) => (
+                            <div
+                                key={index}
+                                className="w-full h-24 bg-gray-300 rounded-lg animate-pulse"
+                            ></div>
+                        ))}
+                    </div>
+                ) : activeCarts.length === 0 ? (
+                    <p className="text-center text-lg text-gray-600">
+                        You have no items in your cart.
                     </p>
                 ) : (
                     activeCarts.map((cart) => (
                         <div key={cart.ID} className="mt-10">
-                            <div
-                                key={cart.Item.ID}
-                                className="bg-white shadow-md rounded-lg p-6 flex items-center justify-evenly"
-                            >
+                            <div className="bg-white shadow-md rounded-lg p-6 flex items-center justify-evenly">
                                 <h3 className="text-lg font-semibold text-gray-700">
                                     {cart.Item.Name}
                                 </h3>
